@@ -1,0 +1,63 @@
+name: Sync upstream repository
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      sync_strategy:
+        description: Git strategy to use for the synchronization.
+        required: false
+        default: merge
+        type: choice
+        options:
+          - ff-only
+          - merge
+          - rebase
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+env:
+  UPSTREAM_URL: 'https://github.com/bookorbit/bookorbit'
+  UPSTREAM_BRANCH: 'main'
+  TARGET_BRANCH: 'main'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out target repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.TARGET_BRANCH }}
+          token: ${{ secrets.UPSTREAM_TOKEN || github.token }}
+          lfs: false
+
+      - name: Archive upstream LFS objects to target releases
+        env:
+          GH_TOKEN: ${{ secrets.UPSTREAM_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          export GIT_LFS_SKIP_SMUDGE=1 GIT_LFS_SKIP_PUSH=1 GIT_TERMINAL_PROMPT=0
+          export GIT_CONFIG_COUNT=2
+          export GIT_CONFIG_KEY_0=credential.https://github.com.helper GIT_CONFIG_VALUE_0=''
+          export GIT_CONFIG_KEY_1=credential.https://github.com.helper GIT_CONFIG_VALUE_1='!gh auth git-credential'
+          mirror_dir=$(mktemp -d)
+          git clone --bare "$UPSTREAM_URL" "$mirror_dir/source.git"
+          python3 .github/refork/lfs_archive.py archive "$UPSTREAM_URL" '${{ github.repository }}' "$mirror_dir/source.git"
+          rm -rf "$mirror_dir"
+
+      - name: Synchronize with upstream
+        env:
+          SYNC_STRATEGY: ${{ github.event.inputs.sync_strategy || 'merge' }}
+        run: |
+          set -euo pipefail
+          git config user.name "refork-sync[bot]"
+          git config user.email "refork-sync[bot]@users.noreply.github.com"
+          sh .github/refork/sync-upstream.sh "$UPSTREAM_URL" "$UPSTREAM_BRANCH" "$TARGET_BRANCH" "$SYNC_STRATEGY"

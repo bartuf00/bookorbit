@@ -1155,7 +1155,7 @@
         "refreshCovers": "Aggiorna le copertine",
         "syncMetadataToFiles": "Sincronizza i metadati sui file",
         "deleteLibrary": "Elimina libreria",
-        "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+        "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
         "booksUnit": "{count, plural, one {# libro} other {# libri}}",
         "folderCount": "{count, plural, =0 {nessuna cartella} one {# cartella} other {# cartelle} many {# cartelle}}",
         "fileMode": "Modalità file",
@@ -1955,6 +1955,11 @@
         }
       },
       "providers": {
+        "tabs": {
+          "builtIn": "Integrati",
+          "external": "Esterni",
+          "attention": "Da verificare"
+        },
         "availableSources": "Fonti disponibili",
         "saveChanges": "Salva modifiche",
         "discard": "Scarta",
@@ -2024,6 +2029,115 @@
           "hardcoverTest": "Il token Hardcover deve superare il test prima di poter essere abilitato",
           "comicvine": "ComicVine richiede una chiave API prima di poter essere abilitato",
           "aladin": "Aladin richiede una chiave TTB prima di poter essere abilitato"
+        }
+      },
+      "providerDirectory": {
+        "title": "Disponibili per l'installazione",
+        "hint": "Ognuno funziona come un piccolo container accanto a BookOrbit. Copia il suo servizio compose nel file che esegue BookOrbit, avvialo con docker compose -d, quindi scegli Aggiungi.",
+        "updated": "Aggiornato {time}",
+        "bundled": "Elenco incluso con questa versione",
+        "loadFailed": "Impossibile caricare l'elenco dei provider integrati. Puoi comunque aggiungere qualsiasi provider tramite il suo indirizzo.",
+        "copy": "Copia Compose",
+        "copyLabel": "Copia il servizio Compose per {name}",
+        "copied": "{name} copiato. Incollalo sotto i servizi: nel tuo file Compose, quindi esegui docker compose up -d.",
+        "copyFailed": "Impossibile copiare negli appunti. I documenti del provider hanno la stessa snippet.",
+        "add": "Aggiungi",
+        "addLabel": "Aggiungi {name}",
+        "alreadyAdded": "Già aggiunto: {names}",
+        "allAdded": "Hai aggiunto tutti i provider in questa lista.",
+        "wasBuiltIn": "In precedenza integrato",
+        "docs": "Documenti",
+        "docsLabel": "Documentazione di {name}, si apre in una nuova scheda",
+        "media": {
+          "book": "Libri",
+          "audiobook": "Audiolibri",
+          "comic": "Fumetti"
+        }
+      },
+      "buildYourOwn": {
+        "title": "Crea il tuo",
+        "body": "Manca una fonte? Un provider è un piccolo servizio web che risponde a tre richieste JSON, quindi va bene qualsiasi linguaggio. Parti dal template iniziale in Rust o Go, verificalo con il test di conformità e poi aggiungilo qui come qualsiasi altro.",
+        "links": {
+          "guide": "Guida alla creazione",
+          "starters": "Template",
+          "checker": "Verifica della conformità",
+          "suggest": "Suggerisci una fonte"
+        }
+      },
+      "movedProviders": {
+        "title": "Alcune fonti non sono più integrate",
+        "description": "Le regole per i campi che elencano queste fonti per ora le saltano. Gli Id e i link già presenti sui tuoi libri verranno conservati.",
+        "run": "{name} ora funziona come provider autonomo: esegui {image}, quindi aggiungilo sotto Provider esterni.",
+        "closed": "{name} ha chiuso il servizio BookOrbit usato, quindi non può essere aggiunto. Rimuoverlo dalle regole del campo."
+      },
+      "externalProviders": {
+        "title": "Fornitori esterni",
+        "description": "Servizi di metadati che vengono eseguiti al di fuori di BookOrbit, come un container o un servizio ospitato. Aggiungine uno tramite il suo indirizzo; una volta abilitato, appare nella ricerca, nel Book Dock e nelle regole del campo come qualsiasi altra fonte.",
+        "yourProviders": "I tuoi fornitori",
+        "emptyWithDirectory": "Non c'è ancora nulla. Scegli un provider pronto all'uso qui sotto, oppure aggiungine uno tramite il suo indirizzo.",
+        "add": "Aggiungi fornitore",
+        "empty": "Ancora nessun provider esterno. Qui puoi aggiungere qualsiasi servizio compatibile con le specifiche del fornitore di metadati.",
+        "edit": "Modifica {name}",
+        "toggle": "Abilita {name}",
+        "row": "{host} · versione {version}",
+        "useInFieldRules": "Usa nelle regole del campo",
+        "fieldRulesAdded": "{name} aggiunto a {count, plural, =0 {nessuna nuova regola di campo; è già presente in ogni regola che può compilare} one {# regola di campo} other {# regole di campo}}.",
+        "added": "{name} aggiunto. Rimane spento finché non lo abiliti.",
+        "saved": "{name} salvato.",
+        "removed": "{name} rimosso. Gli id e le valutazioni memorizzati sono state mantenuti.",
+        "purged": "{name} rimosso assieme ai suoi id e alle sue valutazioni.",
+        "status": {
+          "active": "Attivo",
+          "ready": "Pronto",
+          "stale": "Ultimo controllo non riuscito",
+          "unreachable": "Non raggiungibile",
+          "key_changed": "Chiave modificata",
+          "incompatible": "Incompatibile",
+          "authorizationUnreadable": "Header illeggibile"
+        },
+        "authorizationUnreadableHint": "Impossibile decifrare l'intestazione di autorizzazione salvata, pertanto questo provider non verrà cercato. Inserisci nuovamente l'intestazione.",
+        "sheet": {
+          "createTitle": "Aggiungi provider esterno",
+          "description": "Un servizio HTTP conforme alle specifiche del provider di metadati dei libri. BookOrbit gli richiede i metadati senza mai eseguire il codice del provider.",
+          "identity": "{key} · versione {version}",
+          "test": "Prova",
+          "testing": "Prova in corso...",
+          "remove": "Rimuovi il fornitore",
+          "removeConfirm": "Rimuovere {name}?",
+          "removeConsequence": "Gli Id, le valutazioni e le voci delle regole di campo salvati rimangono memorizzati, quindi aggiungendolo di nuovo verranno ripristinati.",
+          "purge": "Rimuovi ed elimina i dati",
+          "purgeConfirm": "Rimuovere {name} e i relativi dati?",
+          "purgeConsequence": "Elimina ogni Id e valutazione salvati da questo provider. Questa azione non può essere annullata."
+        },
+        "fields": {
+          "baseUrl": "Indirizzo",
+          "baseUrlHint": "URL di base del provider, come http://provider:8080 per un container sulla stessa rete Docker.",
+          "authorization": "Intestazione di autorizzazione",
+          "authorizationHint": "Opzionale. Viene inviata esattamente come inserita, ad esempio \"Bearer abc123\". Viene salvata crittografata e non verrà più mostrata.",
+          "authorizationSaved": "È stata salvata un'intestazione. Inseriscine una nuova per sostituirla.",
+          "clearAuthorization": "Rimuovi l'intestazione salvata",
+          "allowPrivate": "Consenti indirizzo privato",
+          "allowPrivateHint": "Necessario per un fornitore presente nella tua rete o in un container accanto a BookOrbit. Lascialo vuoto per un fornitore su Internet.",
+          "timeout": "Timeout (secondi)",
+          "timeoutHint": "Da {min} a {max} secondi.",
+          "privacy": "Il provider riceve i titoli, gli autori e gli ISBN dei libri relativi alle richieste effettuate."
+        },
+        "test": {
+          "ok": "{name} ha risposto in {latency} ms con {count, plural, one {# risultato} other {# risultati}}.",
+          "sample": "Primo risultato: {title}",
+          "failed": "Test fallito: {error}"
+        },
+        "errors": {
+          "privateAddress": "Questo indirizzo è su una rete privata. Attiva Consenti indirizzi privati per raggiungere un fornitore lì.",
+          "unreachable": "BookOrbit non è riuscito a raggiungere un fornitore a quell'indirizzo.",
+          "unauthorized": "Il fornitore ha rifiutato l'intestazione dell'autorizzazione.",
+          "invalidInfo": "Questo indirizzo ha risposto, ma non con informazioni provider utilizzabili.",
+          "invalidUrl": "Inserisci l'indirizzo del fornitore come un URL http o https completo, senza credenziali.",
+          "keyTaken": "Un fornitore con la stessa chiave è già registrato.",
+          "keyChanged": "Questo indirizzo appartiene a un fornitore diverso. Aggiungilo invece come nuovo fornitore.",
+          "notReady": "Esegui un test con successo prima di abilitare questo provider.",
+          "authorizationUnreadable": "L'intestazione di autorizzazione salvata non può essere decifrata. Inseriscila nuovamente prima di abilitare questo fornitore.",
+          "generic": "La richiesta al fornitore è fallita."
         }
       },
       "fieldRules": {
@@ -3407,6 +3521,12 @@
         "syncEnabled": "KOReader sincronizzazione abilitata",
         "syncDisabled": "KOReader sincronizzazione disabilitata",
         "toggleSyncFailed": "Impossibile attivare/disattivare la sincronizzazione",
+        "pluginLibrary": "Libreria Plugin",
+        "hideAudioOnlyBooks": "Nascondi libri solo audiolibro",
+        "hideAudioOnlyBooksHint": "KOReader non può riprodurre l'audio, quindi i libri con solo file audio rimangono fuori dalle liste del plugin, ricerca e download, così come una libreria contenente nient'altro. I libri che hanno anche un ebook sono ancora visualizzati.",
+        "audioOnlyBooksHidden": "Libri solo-audio nascosti nel plugin",
+        "audioOnlyBooksShown": "Libri solo-audio mostrati nel plugin",
+        "toggleAudioOnlyBooksFailed": "Aggiornamento dell'impostazione della libreria del plugin non riuscito",
         "syncUrlCopied": "Sincronizza URL copiato negli appunti",
         "syncUrlCopyFailed": "Impossibile copiare la sincronizzazione URL",
         "statusRefreshed": "Stato di sincronizzazione aggiornato",
@@ -3457,7 +3577,10 @@
             "reviewDismissed": "Libro ritirato dalla recensione",
             "reviewDismissFailed": "Impossibile aggiornare i libri da rivedere",
             "reviewAllDismissed": "{count, plural, =0 {Non ha cancellato nessun libro dalla recensione} one {Eliminato # libro dalla recensione} other {Eliminato # libri dalla recensione}}",
-            "reviewDismissAllFailed": "Impossibile eliminare tutti i libri dalla recensione"
+            "reviewDismissAllFailed": "Impossibile eliminare tutti i libri dalla recensione",
+            "suggestedLinked": "{count, plural, one {Collegato # libro suggerito} other {Collegati # libri suggeriti}}",
+            "suggestedPartlyLinked": "{linked, plural, one {Collegato # libro suggerito.} other {Collegati # libri suggeriti.}} {failed, plural, one {# non può essere collegato e rimane nella lista.} other {# non possono essere collegati e rimangono nella lista.}}",
+            "suggestedLinkFailed": "Impossibile collegare i libri suggeriti"
           },
           "modal": {
             "linkTitle": "Collega il libro KOReader",
@@ -3518,7 +3641,21 @@
           "manualUnlinkConfirmBody": "Rimuovere il link manuale a {title} e restituire questo libro alla lista delle recensioni. Le future sincronizzazioni utilizzeranno una corrispondenza automatica se esiste. Le statistiche già sincronizzate rimarranno sul loro attuale libro BookOrbit.",
           "reviewDismissConfirmBody": "Questo lo rimuove dai tuoi libri per recensire. La corrispondenza automatica e i dati di sincronizzazione esistenti sono mantenuti. Se un dispositivo segnala nuovamente l'hash senza una corrispondenza, può riapparire.",
           "reviewDismissAllConfirmTitle": "{count, plural, =0 {Nessun libro da recensire} one {Ignora tutto # libro da recensire?} other {Ignora tutti i # libri da recensire?}}",
-          "reviewDismissAllConfirmBody": "Questo cancella tutti i tuoi libri per rivedere la lista, incluse le voci su altre pagine. La corrispondenza automatica e i dati di sincronizzazione esistenti sono mantenuti. Se un dispositivo segnala un hash di nuovo senza una corrispondenza, può riapparire."
+          "reviewDismissAllConfirmBody": "Questo cancella tutti i tuoi libri per rivedere la lista, incluse le voci su altre pagine. La corrispondenza automatica e i dati di sincronizzazione esistenti sono mantenuti. Se un dispositivo segnala un hash di nuovo senza una corrispondenza, può riapparire.",
+          "copyNote": "Questa copia di KOReader è un file diverso da quello presente in BookOrbit. Lo stato di lettura, la valutazione, il tempo di lettura e l'avanzamento (in percentuale) verranno sincronizzati. Le evidenziazioni e i segnalibri non verranno sincronizzati. Per sincronizzare tutto, scarica il libro su KOReader da BookOrbit.",
+          "differentCopyHint": "File diverso da quello in BookOrbit: sincronizzazione dei progressi in percentuale, evidenziazioni e segnalibri non sincronizzati.",
+          "suggestedMatch": "Corrispondenza suggerita",
+          "possibleMatches": "{count, plural, one {# corrispondenza possibile} other {# corrispondenze possibili}}",
+          "morePossibleMatches": "{count, plural, one {Più di # corrispondenza possibile} other {Più di # corrispondenze possibili}}",
+          "possibleMatchesHint": "Libri nella tua biblioteca con lo stesso titolo e gli stessi autori. Verifica l'edizione prima di effettuare il collegamento.",
+          "reviewMatch": "Controlla la corrispondenza",
+          "chooseMatch": "Scegli la corrispondenza",
+          "linkSuggested": "Link suggeriti ({count})",
+          "bulkLinkTitle": "{count, plural, one {Collegare # libro suggerito?} other {Collegare # libri suggeriti?}}",
+          "bulkLinkDescription": "Ogni libro di KOReader qui sotto ha lo stesso titolo e lo stesso autore di un libro nella tua libreria. Controlla la lista prima di collegare.",
+          "bulkLinkConfirm": "{count, plural, one {Collega # libro} other {Collega # libri}}",
+          "bulkLinkListLabel": "Collegamenti suggeriti",
+          "openCandidate": "Apri {title} in una nuova scheda"
         },
         "remove": "Rimuovi",
         "removing": "Rimozione...",
@@ -4239,7 +4376,7 @@
         "privacy": "Decidere quanto degli amministratori delle attività di lettura possono vedere, visualizzare in anteprima il profilo condiviso e controllare chi lo ha visualizzato.",
         "restrictions": "Limiti di contenuto impostati su questo account, come i voti per età e i contenuti nascosti, e ciò che tengono fuori dalle tue librerie.",
         "libraries": "Ogni libreria a colpo d'occhio: le sue cartelle, ciò che contiene, come viene scansionata e quando è stata eseguita. Aggiungere, modificare o ridisegnare le librerie qui.",
-        "metadata-providers": "Attivare o disattivare le fonti dei metadati, aggiungere chiavi API o cookie dove una fonte ne ha bisogno, e testare le credenziali contro il servizio live.",
+        "metadata-providers": "Attivare o disattivare le fonti dei metadati, aggiungere chiavi API o cookie se richiesto dalla fonte, e testare le credenziali per il servizio.",
         "metadata-field-rules": "Scegli quali provider riempiono ogni campo di metadati e in quale ordine, come vengono uniti i valori e come vengono raccolti generi e ID provider.",
         "metadata-custom-fields": "Creare i propri campi di metadati, scegliere il loro tipo e le librerie che li utilizzano, e riordinare o archiviare.",
         "metadata-score": "Decidere quanto conta ogni campo metadati verso il punteggio di completezza mostrato in ogni libro.",
@@ -4769,6 +4906,10 @@
       "clearAll": "Cancella",
       "permissionsHint": "Cosa è consentito fare a questo account. {granted} di {total} concessi.",
       "groupLegend": "{group}: {granted} di {total} concesso",
+      "permissionNotes": {
+        "editMetadataNowhere": "Non ancora attivo: richiede anche il ruolo di Editor o Proprietario su una libreria, impostabile in Impostazioni > Librerie > Accesso.",
+        "editMetadataExcept": "Non in {libraries}, dove questo account è un Visualizzatore. Imposta Editor o Proprietario in Impostazioni > Librerie > Accesso."
+      },
       "presets": {
         "label": "Autorizzazione preimpostata",
         "none": "Nessuno",
@@ -5032,7 +5173,7 @@
     "hub": {
       "title": "Annotazioni",
       "totalCount": "{count} totale",
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "noteCount": "{count, plural, =0 {nessuna nota} one {# nota} other {# note} many {# note}}",
       "export": "Esportazione",
       "exportMarkdown": "Markdown",
@@ -5048,16 +5189,16 @@
         "trash": "Cestino"
       },
       "empty": {
-        "noMatch": "Nessun punto in evidenza corrisponde ai tuoi filtri.",
+        "noMatch": "Nessuna evidenziazione corrisponde ai tuoi filtri.",
         "resetFilters": "Reimposta i filtri",
         "trashEmpty": "Il cestino è vuoto",
-        "noAnnotations": "Nessuna annotazione ancora. I momenti salienti che crei sul Web o sul tuo e-reader vengono visualizzati qui.",
+        "noAnnotations": "Nessuna annotazione. Le evidenziazioni che crei sul web o sul tuo e-reader compariranno qui.",
         "noMatchHint": "Prova una frase più breve oppure cancella i filtri del colore e del libro.",
-        "noAnnotationsBody": "Tutto ciò che contrassegni, in qualsiasi libro e su qualsiasi dispositivo, viene raccolto qui.",
+        "noAnnotationsBody": "Tutto ciò che evidenzi, in qualsiasi libro e su qualsiasi dispositivo, viene raccolto qui.",
         "readHere": "Leggi qui",
         "readHereBody": "Seleziona il testo nel lettore e scegli un colore.",
         "syncKobo": "Sincronizza un Kobo",
-        "syncKoboBody": "I contrassegni effettuati sul dispositivo arrivano alla successiva sincronizzazione.",
+        "syncKoboBody": "Le evidenziazioni create sul dispositivo appariranno alla prossima sincronizzazione.",
         "syncKoreader": "Sincronizza KOReader",
         "syncKoreaderBody": "Il plugin carica le annotazioni con le loro posizioni.",
         "goToLibrary": "Vai alla biblioteca"
@@ -5071,7 +5212,8 @@
         "bulkRestored": "{count, plural, =0 {Restaurato senza annotazioni} one {Restaurato # annotazione} other {Restaurato # annotazioni} many {Restaurato # annotazioni}}",
         "bulkRecolored": "{count, plural, =0 {Ricolorata senza annotazioni} one {Ricolorato # annotazione} other {Ricolorato # annotazioni} many {Ricolorato # annotazioni}}",
         "bulkRestyled": "{count, plural, =0 {Restyling senza annotazioni} one {Rinnovato # annotazione} other {Rinnovato # annotazioni} many {Rinnovato # annotazioni}}",
-        "noteSaved": "Nota salvata"
+        "noteSaved": "Nota salvata",
+        "purgePendingDeviceSync": "Un dispositivo sincronizzato deve ancora rimuovere questa annotazione. Sincronizza quel dispositivo, quindi eliminala definitivamente."
       },
       "railTitle": "{marks} voti · {books} libri",
       "lastTwelveMonths": "Ultimi 12 mesi",
@@ -5082,8 +5224,8 @@
       "allBooks": "Tutti i {count} libri",
       "behindCount": "{count, plural, one {# dietro} many {# dietro} other {# dietro}}",
       "busiestWeek": "Settimana più impegnativa",
-      "longestQuiet": "Il tratto tranquillo più lungo",
-      "mostMarked": "Il più marcato",
+      "longestQuiet": "Intervallo di inattività più lungo",
+      "mostMarked": "Più evidenziati",
       "weekCount": "{count, plural, one {# settimana} many {# settimane} other {# settimane}}",
       "anchorsUnplaced": "{count, plural, one {#} many {# ancore} other {# ancore}}",
       "reviewThem": "Controllali",
@@ -5116,10 +5258,16 @@
       },
       "activitySummary": "{count, plural, one {# evidenzia tra {from} e {to}} many {# momenti salienti tra {from} e {to}} other {# momenti salienti tra {from} e {to}}}",
       "book": "Libro",
-      "needsReview": "Da revisionare"
+      "needsReview": "Da revisionare",
+      "trashToggle": "{count, plural, one {Elimina # annotazione} other {Elimina # annotazioni}}",
+      "purgeDialog": {
+        "title": "Eliminare definitivamente?",
+        "description": "Questa annotazione e la relativa nota verranno rimosse definitivamente. Non potranno essere ripristinate dal cestino."
+      }
     },
     "sources": {
       "web": "Rete",
+      "bookorbit": "BookOrbit",
       "koreader": "KOReader",
       "kobo": "Kobo"
     },
@@ -5260,6 +5408,7 @@
       "BookRequest": "Richiesta di libro",
       "DownloadClient": "Scarica il client",
       "RequestIndexer": "Indicizzatore",
+      "MetadataHttpProvider": "Fornitori di metadati",
       "Author": "Autore",
       "AppSettings": "Impostazioni dell'applicazione",
       "Genre": "Genere",
@@ -5318,6 +5467,7 @@
       "LibraryWriteMetadataToFiles": "Scrivere metadati su file",
       "LibraryBulkRename": "Rinominare i file della libreria",
       "LibraryRecomputeAddedAt": "Data di ricalcolo aggiunta",
+      "LibraryReapplyRegexMetadata": "Applica le regole del percorso ai libri esistenti",
       "PodcastCreate": "Crea podcast",
       "PodcastUpdate": "Aggiorna podcast",
       "PodcastArchive": "Archivia podcast",
@@ -5372,6 +5522,9 @@
       "RequestIndexerPluginInspect": "Plugin indicizzatore ispezionato",
       "RequestIndexerPluginInstall": "Plugin indicizzatore installato",
       "RequestIndexerPluginRemove": "Plugin indicizzatore eliminato",
+      "MetadataHttpProviderCreate": "Fornitore di metadati aggiunto",
+      "MetadataHttpProviderUpdate": "Fornitore di metadati aggiornato",
+      "MetadataHttpProviderDelete": "Fornitore di metadati rimosso",
       "AuthorUpdate": "Aggiorna autore",
       "AuthorDelete": "Elimina autore",
       "AuthorMerge": "Unisci gli autori",
@@ -5714,6 +5867,12 @@
       "errors": {
         "noToken": "Nessun token fornito"
       }
+    },
+    "reconnect": {
+      "heading": "In attesa del server",
+      "description": "Al momento BookOrbit non riesce a raggiungere il suo server. Questa pagina riprenderà automaticamente non appena il server risponderà.",
+      "retry": "Riprova ora",
+      "retrying": "Tentativo in corso..."
     }
   },
   "author": {
@@ -5754,7 +5913,10 @@
       "died": "Deceduto/a il",
       "website": "Sito web",
       "genres": "Generi",
-      "influences": "Influenze"
+      "influences": "Influenze",
+      "findMatch": "Trova l'autore corretto",
+      "source": "Fonte",
+      "pinned": "Fissato"
     },
     "list": {
       "title": "Autori",
@@ -5826,12 +5988,22 @@
         "removing": "Rimozione...",
         "removeImage": "Rimuovi l'immagine",
         "imageHint": "PNG/JPEG/WEBP/GIF/BMP fino a {size} MB",
-        "saving": "Salvataggio..."
+        "saving": "Salvataggio...",
+        "website": "Sito web",
+        "websitePlaceholder": "https://esempio.it",
+        "websiteInvalid": "Inserisci un indirizzo web come esempio.it.",
+        "born": "Nato/a il",
+        "died": "Deceduto/a il",
+        "lifeDatePlaceholder": "1965 o 1965-03-14",
+        "lifeDateHint": "Anno di nascita e di morte, oppure una data completa nel formato anno-mese-giorno.",
+        "lifeDateInvalid": "Inserisci un anno o una data completa nel formato anno-mese-giorno.",
+        "genres": "Generi",
+        "influences": "Influenze"
       },
       "merge": {
         "searchPlaceholder": "Cerca autori da unire a questo autore",
         "searching": "Ricerca...",
-        "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+        "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
         "selectedSummary": "Autori {count} selezionati, ca. {books} libri interessati.",
         "merging": "Unione...",
         "mergeSelected": "Unisci selezionati",
@@ -5886,11 +6058,61 @@
       "fromTheirBook": "Copertina di uno dei loro libri; nessun ritratto in archivio"
     },
     "index": {
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "rowLabel": "{name}, {count, plural, =0 {nessun libro} one {# libro} many {# libri} other {# libri}}",
       "actionsFor": "Azioni per {name}",
       "refreshing": "Aggiornamento dei metadati per {name}",
       "deleting": "Eliminazione di {name}"
+    },
+    "match": {
+      "title": "Trova l'autore corretto",
+      "description": "Seleziona la persona associata a {name}, tramite una ricerca per nome o incollando un link di Goodreads o Audible.",
+      "search": {
+        "label": "Nome",
+        "submit": "Cerca"
+      },
+      "reference": {
+        "label": "Link o Id di Goodreads o Audible",
+        "placeholder": "goodreads.com/author/show/12345",
+        "submit": "Trova",
+        "unrecognised": "Incolla un link all'autore di Goodreads o Audible, un ID Goodreads o un ASIN Audible.",
+        "notFound": "Nessun autore ha quell'Id.",
+        "failed": "Ricerca fallita. Riprova tra un momento."
+      },
+      "results": {
+        "label": "Corrispondenze",
+        "count": "{count, plural, =0 {Nessuna corrispondenza} one {# corrispondenza} other {# corrispondenze}}",
+        "searching": "Ricerca in corso...",
+        "empty": "Nessun autore trovato. Prova a scriverlo diversamente o incolla un link.",
+        "failed": "Ricerca fallita. Riprova tra un momento.",
+        "current": "Attuale",
+        "born": "Nato/a nel {year}",
+        "lifeSpan": "{born}–{died}"
+      },
+      "detail": {
+        "empty": "Scegli una corrispondenza per vedere chi è.",
+        "loading": "Caricamento dei dettagli in corso...",
+        "noBio": "Nessuna biografia.",
+        "viewOn": "Visualizza su {provider}",
+        "back": "Torna alle corrispondenze",
+        "use": "Utilizza questo autore",
+        "unpin": "Sblocca",
+        "pinnedHint": "Fissato: gli aggiornamenti cercano questo autore tramite Id anziché tramite nome.",
+        "currentHint": "L'autore è ora associato a questa persona. Usa questa opzione per fissare l'associazione."
+      },
+      "confirm": {
+        "title": "Usare questo autore di {provider}?",
+        "description": "La biografia, la foto, le date, il sito web, i generi e le influenze verranno sostituiti con quelli di questo autore e i successivi aggiornamenti rimarranno collegati a questa persona.",
+        "confirm": "Utilizza questo autore"
+      },
+      "toast": {
+        "pinned": "Ora associato a {name} su {provider}",
+        "unpinned": "Sbloccato. Gli aggiornamenti cercheranno di nuovo per nome.",
+        "notFound": "{provider} non ha più alcun autore con questo Id.",
+        "providerDown": "Impossibile raggiungere {provider}. Riprova tra un attimo.",
+        "failed": "Impossibile utilizzare questo autore.",
+        "unpinFailed": "Impossibile sbloccare la corrispondenza."
+      }
     }
   },
   "book": {
@@ -5911,7 +6133,7 @@
     "unknownFormat": "sconosciuto",
     "collapsedSeries": {
       "label": "Serie",
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "readCount": "{count} leggi"
     },
     "card": {
@@ -6098,6 +6320,7 @@
         "before": "prima",
         "after": "dopo",
         "withinLast": "entro l'ultimo",
+        "moreThanAgo": "più di",
         "isMissing": "manca",
         "isPresent": "è presente",
         "isUnread": "non è letto",
@@ -6120,6 +6343,7 @@
       "withinLastPlaceholder": "ad es. 7",
       "unit": {
         "days": "giorni",
+        "daysAgo": "giorni fa",
         "weeks": "settimane",
         "months": "mesi",
         "megabytes": "MB"
@@ -6144,7 +6368,8 @@
     },
     "deleteDialog": {
       "title": "Eliminare il libro?",
-      "description": "Ciò eliminerà definitivamente il libro e tutti i suoi metadati, file, progressi di lettura e segnalibri. Questa operazione non può essere annullata."
+      "description": "Ciò eliminerà definitivamente il libro e tutti i suoi metadati, file, progressi di lettura e segnalibri. Questa operazione non può essere annullata.",
+      "keepsHistory": "Le letture completate rimangono nella cronologia di ciascun lettore, sotto il titolo e l'autore del libro."
     },
     "bulkEdit": {
       "title": "{count, plural, =0 {Modifica metadati - # libro} one {Modifica metadati - # libro} other {Modifica metadati - # libri} many {Modifica metadati - # libri}}",
@@ -6305,6 +6530,7 @@
         "details": "Dettagli",
         "editMetadata": "Modifica metadati",
         "files": "File",
+        "chapters": "Capitoli",
         "readingLog": "Registro di lettura",
         "highlights": "Punti salienti"
       },
@@ -6446,6 +6672,20 @@
         },
         "editCover": "Modifica copertina",
         "viewCover": "Visualizza la copertina ingrandita",
+        "coverStack": {
+          "show": {
+            "ebook": "Mostra la copertina del libro",
+            "audio": "Mostra la copertina dell'audiolibro"
+          },
+          "front": {
+            "ebook": "Visualizzazione della copertina del libro in corso",
+            "audio": "Visualizzazione della copertina dell'audiolibro in corso"
+          }
+        },
+        "readAloudInvite": {
+          "chip": "Lettura vocale",
+          "title": "Crea una lettura vocale dall'EPUB e dall'audiolibro di questo libro"
+        },
         "finished": "Finito",
         "resetFileProgress": "Reimposta l'avanzamento del file",
         "resetEditionProgress": "Reimposta i progressi per {format}",
@@ -6463,6 +6703,14 @@
             "unavailable": "Non disponibile",
             "epubCopiesOnly": "EPUB solo copie"
           },
+          "chip": {
+            "enabled": "Sincronizzato",
+            "partial": "Parzialmente sincronizzato",
+            "disabled": "Sincronizzazione disattivata",
+            "unavailable": "Problema di sincronizzazione"
+          },
+          "chipAria": "Sincronizzazione lettura vocale: {status}",
+          "noneYet": "Non ci sono ancora EPUB con lettura vocale. Creane uno per sincronizzare le posizioni tra l'audiolibro e il testo.",
           "enabledDescription": "Le posizioni di audiolibri, web reader, Kobo e KOReader rimangono sincronizzate.",
           "disabledDescription": "Ciascun formato mantiene la propria posizione di lettura.",
           "epubCopiesDescription": "Le posizioni del lettore web, di Kobo e di KOReader rimangono sincronizzate tra le copie EPUB. Aggiungi i file dell'audiolibro corrispondenti per sincronizzare anche l'audiolibro.",
@@ -6624,6 +6872,8 @@
         "durationLabel": "Durata (s)",
         "abridgedLabel": "Ridotto",
         "providerIds": "ID fornitore",
+        "externalProviderUnavailable": "{provider} non è più registrato, quindi questo id è mantenuto ma non utilizzato",
+        "clearExternalProviderId": "Cancella l'Id di {provider}",
         "comicDetails": "Dettagli comici",
         "comicIssueNumberLabel": "Numero di emissione",
         "comicVolumeLabel": "Volume",
@@ -6983,6 +7233,83 @@
       },
       "files": {
         "title": "File di libri",
+        "readAloud": {
+          "action": "Crea lettura vocale",
+          "loadFailed": "La disponibilità della lettura vocale non può essere verificata.",
+          "loadFailedAgain": "{count, plural, one {La disponibilità della lettura vocale non può ancora essere verificata dopo # tentativo.} other {La disponibilità della lettura vocalee non può ancora essere verificata dopo # tentativi.}}",
+          "checkAgain": "Ricontrolla",
+          "checking": "Controllo in corso…",
+          "reasons": {
+            "worker_unavailable": "Il servizio di lettura vocale non è attivo in questo momento.",
+            "worker_incompatible": "Il servizio di lettura vocale richiede un aggiornamento per funzionare con questo server.",
+            "book_missing": "Ripristina i file mancanti di questo libro per creare una lettura vocale.",
+            "no_epub": "Aggiungi un file EPUB semplice a questo libro per creare una lettura vocale.",
+            "no_epub_existing": "Questo libro ha già una lettura vocale e nessun EPUB semplice da cui rigenerarla.",
+            "too_many_audio_files": "Questo audiolibro è suddiviso in un numero di file superiore a quello consentito per creare una lettura vocale.",
+            "epub_not_allowed": "Questa biblioteca non accetta i file EPUB, quindi non è possibile aggiungere una lettura vocale.",
+            "library_not_mounted": "Il servizio di lettura vocale non riesce ad accedere alla cartella di questa biblioteca.",
+            "job_active": "Per questo libro è già stata creata una lettura vocale.",
+            "unknown": "Al momento non è possibile creare una lettura vocale per questo libro."
+          },
+          "dialog": {
+            "title": "Crea lettura vocale",
+            "description": "Sincronizza la narrazione con il testo dell'ebook e aggiunge un EPUB che si evidenzia in sincronia con l'audio.",
+            "sources": "Fonti",
+            "ebook": "Ebook",
+            "ebookHint": "Seleziona l'EPUB standard che corrisponde alla narrazione.",
+            "existing": {
+              "title": "{count, plural, one {Questo libro ha già una lettura vocale} other {Questi libri hanno già # letture vocali}}",
+              "replace": "Sostituisci {filename}",
+              "keep": "{count, plural, one {Mantieni entrambi} other {Mantieni tutti}}",
+              "keepHint": "La nuova lettura vocale viene aggiunta come file separato.",
+              "replaceHint": "Il vecchio file viene sostituito solo dopo che quello nuovo supera i controlli, e le posizioni di lettura vengono mantenute.",
+              "replaceNotPermitted": "La sostituzione di una lettura vocale richiede l'autorizzazione a eliminare i libri, quindi il nuovo viene aggiunto come ulteriore file.",
+              "generated": "Realizzato da BookOrbit",
+              "imported": "Importato"
+            },
+            "audio": "Audiolibro",
+            "audioSummary": "{count, plural, one {# traccia} other {# tracce}}, {order, select, book {in base all'ordine del libro} other {nell'ordine scelto da te}}",
+            "audioSummaryWithDuration": "{count, plural, one {# traccia} other {# tracce}}, {duration}, {order, select, book {in base all'ordine del libro} other {nell'ordine scelto da te}}",
+            "audioSkipped": "{count, plural, one {# traccia saltata} other {# tracce saltate}}",
+            "changeOrder": "Modifica ordine",
+            "restoreOrder": "Ripristina l'ordine del libro",
+            "trackList": "Tracce in ordine di ascolto",
+            "trackLabel": "Traccia {position} di {total}: {name}",
+            "moveUp": "Sposta {name} su",
+            "moveDown": "Sposta {name} giù",
+            "moved": "{name} spostato nella posizione {position} di {total}",
+            "skipped": "Saltato",
+            "noTracks": "Seleziona almeno una traccia.",
+            "language": "Lingua della narrazione",
+            "chooseLanguage": "Scegli una lingua",
+            "languageUnsupported": "{language} non è supportato dal modello vocale.",
+            "languageFromBook": "Dai dettagli di questo libro.",
+            "languageIsDefault": "La tua lingua predefinita.",
+            "languageSavedAsDefault": "Salvato come lingua predefinita.",
+            "setDefaultLanguage": "Imposta come predefinita",
+            "defaultLanguageFailed": "Impossibile salvare la lingua predefinita. Riprova.",
+            "granularity": "Evidenziazione",
+            "sentence": "Frase",
+            "sentenceHint": "Evidenzia una frase alla volta. Consigliato.",
+            "word": "Parola",
+            "wordHint": "Evidenzia ogni parola. Richiede più tempo e crea un file più grande.",
+            "experimental": "Sperimentale",
+            "model": "Modello vocale: {model}",
+            "estimatedSize": "Dimensione stimata: {size}",
+            "lowDiskLabel": "Spazio su disco in esaurimento.",
+            "lowDisk": "Sono necessari circa {needed} di spazio di archiviazione sul worker, che ha {free} disponibili.",
+            "processingNote": "Viene eseguito in background. Gli audiolibri lunghi possono richiedere diverse ore, e al primo utilizzo per una determinata lingua verrà scaricato il modello corrispondente.",
+            "start": "Inizia",
+            "starting": "Avvio in corso…"
+          },
+          "devices": {
+            "cpu": "Esecuzione su CPU",
+            "mlx": "Esecuzione su Apple Silicon (MLX)",
+            "cuda": "Esecuzione su una GPU NVIDIA (CUDA)",
+            "webgpu": "Esecuzione sulla GPU (WebGPU)",
+            "other": "Esecuzione su {device}"
+          }
+        },
         "stats": {
           "files": "File",
           "total": "Totale",
@@ -7680,7 +8007,7 @@
       },
       "series": {
         "seriesRow": "Riga della serie",
-        "bookCount": "{count, plural, =0 {(niente libri)} one {(# libro)} other {(# libri)} many {(# libri)}}",
+        "bookCount": "{count, plural, =0 {(nessun libro)} one {(# libro)} other {(# libri)} many {(# libri)}}",
         "readOfCount": "{read} di {total} letto"
       },
       "text": {
@@ -8905,7 +9232,7 @@
       "inCollection": "In questa raccolta",
       "allInCollection": "Tutti i {total} in questa raccolta",
       "partialInCollection": "{partial} di {total} in questa raccolta",
-      "bookCount": "{count, plural, =0 {niente libri} one {un libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {un libro} other {# libri} many {# libri}}",
       "loadFailed": "Impossibile caricare le raccolte",
       "createdAndAdded": "{count, plural, =0 {Creata \"{name}\" senza aggiungere libri} one {Creata \"{name}\" e aggiunto un libro} other {Creata \"{name}\" e aggiunti # libri} many {Creata \"{name}\" e aggiunti # libri}}",
       "createdButAddFailed": "Creata \"{name}\", ma non è stato possibile aggiungere i libri",
@@ -8925,7 +9252,7 @@
       "loadingMore": "Caricamento di più...",
       "loadMore": "Carica altro ({loaded}/{total})",
       "allMatchesShown": "{count, plural, =0 {Mostrata 1 corrispondenza} one {Mostrata 1 corrispondenza} other {Mostrate tutte le # corrispondenze} many {Mostrate tutte le # corrispondenze}}",
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "fileCount": "{count, plural, =0 {nessun file} one {# file} other {# file} many {# file}}",
       "uploadedToast": "Caricato {uploaded}",
       "uploadFailedToast": "Caricamento non riuscito per {failed}",
@@ -9723,7 +10050,7 @@
     },
     "send": {
       "title": "Invia tramite e-mail",
-      "bookCount": "{count, plural, =0 {niente libri} one {un libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {un libro} other {# libri} many {# libri}}",
       "recipients": "Destinatari",
       "noRecipients": "Nessun destinatario configurato. Aggiungine uno nelle Impostazioni email.",
       "groups": "Gruppi",
@@ -11882,7 +12209,7 @@
       "pageTitleNamed": "Serie · {name}",
       "pageTitleWithId": "Serie n.{id}",
       "entityName": "Serie",
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "byAuthors": "di {authors}",
       "moreAuthors": "+{count} altri",
       "preparingEditor": "Redazione in preparazione...",
@@ -12008,7 +12335,7 @@
       "untitled": "SmartScope senza titolo",
       "subtitle": "Configurare le impostazioni dell'ambito intelligente",
       "counting": "contare...",
-      "bookCount": "{count, plural, =0 {niente libri} one {un libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {un libro} other {# libri} many {# libri}}",
       "identity": "Identità",
       "filters": "Filtri",
       "noFilters": "Nessun filtro impostato. Tutti i libri accessibili saranno inclusi in questo ambito intelligente.",
@@ -12524,7 +12851,7 @@
     },
     "entityManager": {
       "unknown": "Sconosciuto",
-      "bookCount": "{count, plural, =0 {niente libri} one {# libro} other {# libri} many {# libri}}",
+      "bookCount": "{count, plural, =0 {nessun libro} one {# libro} other {# libri} many {# libri}}",
       "sortPrefix": "· ordina: {sortName}",
       "selectTargetToKeep": "Seleziona l'obiettivo da mantenere",
       "writeToFiles": "Scrivere su file",

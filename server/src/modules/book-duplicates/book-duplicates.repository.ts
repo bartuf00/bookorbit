@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, count, desc, eq, inArray, ne, sql, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, lte, ne, or, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { BookDuplicateGroupSort, BookDuplicateKind, BookDuplicateMatchReason, BookDuplicateSortOrder } from '@bookorbit/types';
@@ -8,6 +8,8 @@ import { buildContentFilterClauses } from '../../common/utils/content-filter-sql
 import type { RequestUser } from '../../common/types/request-user';
 import { DB } from '../../db';
 import * as schema from '../../db/schema';
+import { afterPosition, keysetOrder, microseconds, type JobKey, type JobPosition, type KeysetColumns } from '../jobs/job-keyset';
+import { groupDuplicatePairs } from './book-duplicate-grouping';
 import { crossFormatTitleSql, mediaFamilySql } from './book-duplicate-normalize';
 import {
   bookDuplicateDismissals,
@@ -19,12 +21,56 @@ import {
   bookFiles,
   bookMetadata,
   books,
+  bookSeriesMemberships,
+  libraries,
+  users,
 } from '../../db/schema';
 
 export type Db = NodePgDatabase<typeof schema>;
 type ScanRow = typeof bookDuplicateScans.$inferSelect;
 
 const BOOK_DUPLICATE_SCAN_LOCK_NAMESPACE = 1_112_493_899;
+
+export interface DuplicateScanPageQuery {
+  view: 'queue' | 'needs-you' | 'failed' | 'history';
+  /** One account's scans; null for everyone's. Scans always have an owner. */
+  ownerId: number | null;
+  /** Failed scans that finished at or before this have aged into History. */
+  cutoffAt: Date;
+  after: JobPosition | null;
+  typeIndex: number;
+  limit: number;
+}
+
+const SCAN_PAGE_COLUMNS = {
+  id: bookDuplicateScans.id,
+  userId: bookDuplicateScans.userId,
+  libraryIds: bookDuplicateScans.libraryIds,
+  requestedLibraryId: bookDuplicateScans.requestedLibraryId,
+  status: bookDuplicateScans.status,
+  processedBooks: bookDuplicateScans.processedBooks,
+  totalBooks: bookDuplicateScans.totalBooks,
+  errorCode: bookDuplicateScans.errorCode,
+  createdAt: bookDuplicateScans.createdAt,
+  completedAt: bookDuplicateScans.completedAt,
+};
+
+export type DuplicateScanPageRow = Pick<ScanRow, keyof typeof SCAN_PAGE_COLUMNS> & {
+  requesterName: string | null;
+  /** 1-based place among queued scans, which one worker runs oldest first; 0 otherwise. */
+  rank: number;
+  key: JobKey;
+};
+
+export interface DuplicateScanCounts {
+  queue: number;
+  failed: number;
+  running: number;
+  queued: number;
+}
+
+/** When a scan ended, never null, so no row drops out of a keyset comparison. */
+const SCAN_FINISH = sql`coalesce(${bookDuplicateScans.completedAt}, ${bookDuplicateScans.createdAt})`;
 
 // Whole-library scan statements run in the background on the request pool, whose 30s statement
 // timeout a large library can outlast, so they get a wider but still finite budget of their own.
@@ -393,41 +439,77 @@ export class BookDuplicatesRepository {
     );
   }
 
+  /**
+   * Removes pairs whose books hold different positions in one series: they are different volumes,
+   * not copies, whatever their titles, ISBNs or work ids say. A matching file hash is the one exception.
+   */
+  async deleteSeriesConflictPairs(scanId: number): Promise<number> {
+    const result = await this.withScanBudget((db) =>
+      db.execute(sql`
+      DELETE FROM ${bookDuplicatePairs} pair
+      WHERE pair.scan_id = ${scanId}
+        AND NOT ('file_hash' = ANY(pair.reasons))
+        AND EXISTS (
+          SELECT 1
+          FROM ${bookSeriesMemberships} membership_a
+          JOIN ${bookSeriesMemberships} membership_b ON membership_b.series_id = membership_a.series_id
+          WHERE membership_a.book_id = pair.book_id_a
+            AND membership_b.book_id = pair.book_id_b
+            AND membership_a.series_index IS NOT NULL
+            AND membership_b.series_index IS NOT NULL
+            AND membership_a.series_index::numeric <> membership_b.series_index::numeric
+        )
+    `),
+    );
+    return result.rowCount ?? 0;
+  }
+
   async finalizeGroups(scanId: number): Promise<number> {
     return this.db.transaction(async (tx) => {
       await tx.execute(SET_SCAN_STATEMENT_TIMEOUT);
+      const pairs = await tx.execute<{ book_id_a: number; book_id_b: number; reasons: string[]; title_similarity: number | null }>(sql`
+        SELECT book_id_a, book_id_b, reasons, title_similarity
+        FROM ${bookDuplicatePairs}
+        WHERE scan_id = ${scanId} AND kind = 'duplicate'
+      `);
+      const positions = await tx.execute<{ book_id: number; series_id: number; series_index: string | null }>(sql`
+        SELECT membership.book_id, membership.series_id, membership.series_index
+        FROM ${bookSeriesMemberships} membership
+        WHERE membership.series_index IS NOT NULL
+          AND membership.book_id IN (
+            SELECT book_id_a FROM ${bookDuplicatePairs} WHERE scan_id = ${scanId} AND kind = 'duplicate'
+            UNION
+            SELECT book_id_b FROM ${bookDuplicatePairs} WHERE scan_id = ${scanId} AND kind = 'duplicate'
+          )
+      `);
+      const roots = groupDuplicatePairs(
+        pairs.rows.map((row) => ({
+          bookIdA: row.book_id_a,
+          bookIdB: row.book_id_b,
+          reasons: row.reasons,
+          titleSimilarity: row.title_similarity === null ? null : Number(row.title_similarity),
+        })),
+        positions.rows.map((row) => ({ bookId: row.book_id, seriesId: row.series_id, seriesIndex: row.series_index })),
+      );
+
       await tx.execute(sql`CREATE TEMP TABLE tmp_book_duplicate_components (book_id integer PRIMARY KEY, root_id integer NOT NULL) ON COMMIT DROP`);
       await tx.execute(sql`
         INSERT INTO tmp_book_duplicate_components (book_id, root_id)
-        SELECT book_id, book_id
-        FROM (
-          SELECT book_id_a AS book_id FROM ${bookDuplicatePairs} WHERE scan_id = ${scanId} AND kind = 'duplicate'
-          UNION
-          SELECT book_id_b AS book_id FROM ${bookDuplicatePairs} WHERE scan_id = ${scanId} AND kind = 'duplicate'
-        ) endpoints
+        SELECT * FROM unnest(${sql.param([...roots.keys()])}::int[], ${sql.param([...roots.values()])}::int[])
       `);
-
-      for (;;) {
-        const result = await tx.execute(sql`
-          WITH neighbor_roots AS (
-            SELECT component.book_id, min(neighbor.root_id) AS new_root
-            FROM tmp_book_duplicate_components component
-            JOIN ${bookDuplicatePairs} pair
-              ON pair.scan_id = ${scanId}
-              AND pair.kind = 'duplicate'
-              AND (pair.book_id_a = component.book_id OR pair.book_id_b = component.book_id)
-            JOIN tmp_book_duplicate_components neighbor
-              ON neighbor.book_id = CASE WHEN pair.book_id_a = component.book_id THEN pair.book_id_b ELSE pair.book_id_a END
-            GROUP BY component.book_id
+      // A pair the grouping refused to join, such as a series-less copy matching two volumes, would
+      // otherwise land in one endpoint's group without the other book.
+      await tx.execute(sql`
+        DELETE FROM ${bookDuplicatePairs} pair
+        WHERE pair.scan_id = ${scanId}
+          AND pair.kind = 'duplicate'
+          AND NOT EXISTS (
+            SELECT 1
+            FROM tmp_book_duplicate_components component_a
+            JOIN tmp_book_duplicate_components component_b ON component_b.root_id = component_a.root_id
+            WHERE component_a.book_id = pair.book_id_a AND component_b.book_id = pair.book_id_b
           )
-          UPDATE tmp_book_duplicate_components component
-          SET root_id = neighbor_roots.new_root
-          FROM neighbor_roots
-          WHERE component.book_id = neighbor_roots.book_id
-            AND neighbor_roots.new_root < component.root_id
-        `);
-        if ((result.rowCount ?? 0) === 0) break;
-      }
+      `);
 
       await tx.execute(sql`
         WITH member_counts AS (
@@ -915,5 +997,127 @@ export class BookDuplicatesRepository {
       ORDER BY member.group_id, ${bookMetadata.metadataScore} DESC NULLS LAST, ${books.id}
     `);
     return result.rows;
+  }
+
+  /** A page of scans for the Jobs area, in the view's keyset order. Nothing waits on a person, so Needs you is empty. */
+  async pageForJobs(query: DuplicateScanPageQuery): Promise<DuplicateScanPageRow[]> {
+    if (query.view === 'needs-you') return [];
+    return query.view === 'queue' ? await this.scanQueuePage(query) : await this.settledScanPage(query);
+  }
+
+  /** How many scans each Jobs-area view holds, failed ones measured from `cutoffAt`. */
+  async countForJobs(ownerId: number | null, cutoffAt: Date): Promise<DuplicateScanCounts> {
+    const [row] = await this.db
+      .select({
+        running: sql<number>`count(*) filter (where ${bookDuplicateScans.status} = 'running')`.mapWith(Number),
+        queued: sql<number>`count(*) filter (where ${bookDuplicateScans.status} = 'queued')`.mapWith(Number),
+        failed: sql<number>`count(*) filter (where ${this.failedScanShown(cutoffAt)})`.mapWith(Number),
+      })
+      .from(bookDuplicateScans)
+      .where(and(inArray(bookDuplicateScans.status, ['queued', 'running', 'failed']), this.scanOwned(ownerId)));
+    const running = row?.running ?? 0;
+    const queued = row?.queued ?? 0;
+    return { queue: running + queued, failed: row?.failed ?? 0, running, queued };
+  }
+
+  /** Who owns each scan that exists, for answering actions on ids a client sent. */
+  async findScanOwners(scanIds: readonly number[]): Promise<Map<number, number>> {
+    if (scanIds.length === 0) return new Map();
+    const rows = await this.db
+      .select({ id: bookDuplicateScans.id, userId: bookDuplicateScans.userId })
+      .from(bookDuplicateScans)
+      .where(inArray(bookDuplicateScans.id, [...scanIds]));
+    return new Map(rows.map((row) => [row.id, row.userId]));
+  }
+
+  /** Library names by id, for naming what a scan covered. */
+  async findLibraryNames(libraryIds: readonly number[]): Promise<Map<number, string>> {
+    if (libraryIds.length === 0) return new Map();
+    const rows = await this.db
+      .select({ id: libraries.id, name: libraries.name })
+      .from(libraries)
+      .where(inArray(libraries.id, [...libraryIds]));
+    return new Map(rows.map((row) => [row.id, row.name]));
+  }
+
+  /** The running scan, then queued ones in the order the worker takes them. */
+  private async scanQueuePage(query: DuplicateScanPageQuery): Promise<DuplicateScanPageRow[]> {
+    // Aliased: drizzle renders column references unqualified, which inside a subquery would bind to the wrong row.
+    const line = this.db
+      .$with('scan_line')
+      .as(
+        this.db
+          .select({ lineId: sql<number>`scan_order.id`.as('line_id'), place: sql<number>`scan_order.place`.as('place') })
+          .from(
+            sql`(select q.id, row_number() over (order by q.created_at, q.id) as place from book_duplicate_scans q where q.status = 'queued') scan_order`,
+          ),
+      );
+    const group = sql<number>`case when ${bookDuplicateScans.status} = 'running' then 0 else 1 end`;
+    const rank = sql<number>`case when ${bookDuplicateScans.status} = 'queued' then coalesce(${line.place}, 2147483647) else 0 end`;
+    const at = microseconds(sql`${bookDuplicateScans.createdAt}`);
+    const columns: KeysetColumns = {
+      prefix: [
+        { kind: 'number', expr: group },
+        { kind: 'number', expr: rank },
+      ],
+      suffix: [{ kind: 'number', expr: at }],
+      id: { kind: 'number', expr: sql`${bookDuplicateScans.id}` },
+    };
+    const rows = await this.db
+      .with(line)
+      .select({
+        ...SCAN_PAGE_COLUMNS,
+        group: sql<number>`${group}`.mapWith(Number),
+        rank: sql<number>`${rank}`.mapWith(Number),
+        at,
+        requesterName: users.name,
+      })
+      .from(bookDuplicateScans)
+      .leftJoin(line, eq(line.lineId, bookDuplicateScans.id))
+      .leftJoin(users, eq(users.id, bookDuplicateScans.userId))
+      .where(
+        and(
+          inArray(bookDuplicateScans.status, ['queued', 'running']),
+          this.scanOwned(query.ownerId),
+          query.after ? afterPosition(columns, 'queue', query.after, query.typeIndex) : undefined,
+        ),
+      )
+      .orderBy(...keysetOrder(columns, 'queue'))
+      .limit(query.limit);
+    return rows.map(({ group: band, rank: place, at: since, ...row }) => ({
+      ...row,
+      rank: place,
+      key: { prefix: [band, place], suffix: [since], id: row.id },
+    }));
+  }
+
+  /** Failed and History by when the scan ended, newest first. */
+  private async settledScanPage(query: DuplicateScanPageQuery): Promise<DuplicateScanPageRow[]> {
+    const columns: KeysetColumns = {
+      prefix: [{ kind: 'time', expr: SCAN_FINISH }],
+      suffix: [],
+      id: { kind: 'number', expr: sql`${bookDuplicateScans.id}` },
+    };
+    const shown =
+      query.view === 'failed'
+        ? this.failedScanShown(query.cutoffAt)
+        : or(eq(bookDuplicateScans.status, 'completed'), and(eq(bookDuplicateScans.status, 'failed'), lte(SCAN_FINISH, query.cutoffAt)));
+    const rows = await this.db
+      .select({ ...SCAN_PAGE_COLUMNS, finish: microseconds(SCAN_FINISH), requesterName: users.name })
+      .from(bookDuplicateScans)
+      .leftJoin(users, eq(users.id, bookDuplicateScans.userId))
+      .where(and(shown, this.scanOwned(query.ownerId), query.after ? afterPosition(columns, query.view, query.after, query.typeIndex) : undefined))
+      .orderBy(...keysetOrder(columns, query.view))
+      .limit(query.limit);
+    return rows.map(({ finish, ...row }) => ({ ...row, rank: 0, key: { prefix: [finish], suffix: [], id: row.id } }));
+  }
+
+  /** Failed and finished after the cutoff: what the Failed view still shows. */
+  private failedScanShown(cutoffAt: Date): SQL {
+    return and(eq(bookDuplicateScans.status, 'failed'), sql`${SCAN_FINISH} > ${cutoffAt}`)!;
+  }
+
+  private scanOwned(ownerId: number | null): SQL | undefined {
+    return ownerId === null ? undefined : eq(bookDuplicateScans.userId, ownerId);
   }
 }
